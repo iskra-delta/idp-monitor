@@ -1,19 +1,8 @@
 # Directories.
 .vscode/
 lab/
-
-# SDCC
-*.lst
-*.rel
-*.sym
-*.adb
-*.asm
-*.bin
-*.cdb
-*.ihx
-*.lk
-*.map
-*.noi
+bin/
+build/
 
 # Special.
 config.inc
