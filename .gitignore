@@ -1,8 +1,19 @@
-# SDCC stuff
-*.lnk
+# Directories.
+.vscode/
+lab/
+
+# SDCC
 *.lst
-*.map
-*.mem
 *.rel
-*.rst
 *.sym
+*.adb
+*.asm
+*.bin
+*.cdb
+*.ihx
+*.lk
+*.map
+*.noi
+
+# Special.
+config.inc

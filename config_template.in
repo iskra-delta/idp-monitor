@@ -1,0 +1,15 @@
+        ;; config_template.in
+        ;; 
+        ;; template for creating config.s for the
+        ;; monitor program. this file is used to glue
+        ;; together various parts of the monitor software
+        ;;
+        ;; MIT License (see: LICENSE)
+        ;; copyright (c) 2023 tomaz stih
+        ;;
+        ;; 2023-09-09   tstih
+
+        ;; addresses!
+        .equ    MONITOR_ADDRESS, CFG_MONITOR_ADDRESS
+        .equ    MONITOR_STACK, CFG_MONITOR_STACK
+        .equ    MONITOR_SIZE, CFG_MONITOR_SIZE
