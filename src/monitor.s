@@ -1,6 +1,13 @@
             ;; monitor.s
             ;; 
-            ;; the monitor
+            ;; the monitor. 
+            ;; NOTES:
+            ;;  - monitor is located in shared memory at the top of memory
+            ;;  - it initializes bank 0 and bank 1 zero page (the RST vectors) 
+            ;;  - it uses no interrupts: serial comms are implemented by polling.
+            ;;  - interrupts are disabled when in monitor mode!
+            ;;  - implemented gdb serial protocol is described here:
+            ;;    https://www.embecosm.com/appnotes/ean4/embecosm-howto-rsp-server-ean4-issue-2.html
             ;;
             ;; MIT License (see: LICENSE)
             ;; copyright (c) 2023 tomaz stih
@@ -12,97 +19,92 @@
 
             .area   _HEADER (ABS)
             .org    MONITOR_ADDRESS
-page0:
+page0:      ;; page 0 table only has two entries
+            ;; RST 0x00 is debugger start
+            ;; RST 0x08 is debugger breakpoint
             jp      rst0
             jp      rst8
-            jp      rst10
-            jp      rst18
-            jp      rst20
-            jp      rst28
-            jp      rst30
-            jp      rst38
-            jp      nmi
+init_page0:
+            ld      hl,#page0           ; from "our" page 0
+            ld      de,#0x0             ; RST 0 vector
+            ld      bc,#3               ; jp opcode + address
+            ldir
+            ld      de,#0x8             ; and rst 8
+            ld      bc,#3               
+            ret
 
-            ;; the code
+            ;; monitor code assumes that interrupts are disabled!
 rst0:       
-            di
             ;; switch ROM off
             out     (0x80),a
             ;; init page 0 of bank 0
-            call    rst0_init_page0
+            call    init_page0
             ;; switch bank
             out     (0x90),a
             ;; init page 0 of bank 1
-            call    rst0_init_page0
-            ;; now initialize required interrupt vectors
-            ;; ...todo...
-            ;; enable interrupts
-            im  2
-            ei
+            call    init_page0
             ;; and pass control to the debugger 
             jp  rst8
 
-rst0_init_page0:
-            ld      hl,#0x0000          ; initialize page 0
-            ld      de,#0               ; initial value
-            call    fill_page           ; fill page 0 with zeroes
-            ld      hl,#0x0000          ; RST vectors
-            ld      de,#page0           ; to page 0
-            ld      a,#8                ; 8 vectors
-rst0_loop:  ld      bc,#3               ; 3 bytes
-            ldir    
-            ;; skip over 5 bytes to next rst
-            inc     hl
-            inc     de
-            inc     hl
-            inc     de
-            inc     hl
-            inc     de
-            inc     hl
-            inc     de
-            inc     hl
-            inc     de
-            dec     a
-            jr      nz,rst0_loop        ; next vector
-            ;; and copy nmi, hl already points to the correct address
-            ld      de,#0x0066
-            ld      bc,#3
-            ldir
+rst8:       ;; the debugger (breakpoint!)
+            reti
+
+            
+            ;; ----- remote serial protocol -----------------------------------
+rsp_init:   ret
+
+            ;; ----------------------------------------------------------------
+            ;; rsp_send_packet
+            ;; input:
+            ;;  de = data
+            ;;  b = len
+rsp_send_packet:
+            ld      a,#'$'
+            call    serial_write_a
+            ;; send package
+            push    bc                  ; store len
+rsp_sp_send_byte:
+            ld      a,(de)              ; get byte for sending
+            ;; TODO escape
+            call    serial_write_a      ; write to serial port
+            inc     de                  ; next char
+            djnz    rsp_sp_send_byte
+            ;; all data sent
+            pop     bc                  ; restore len
+            ;; finish the package with #...
+            ld      a,#'#'
+            call    serial_write_a
+            ;; ...and the checksum.
+
+rsp_ack:    ld      a,#'+'
+            call    serial_write_a
             ret
 
-rst8:       
-            reti
+rsp_nak:    ld      a,#'-'
+            call    serial_write_a
+            ret
 
-rst10:       
-            reti
+rsp_checksum:
 
-rst18:       
-            reti
+            ;; ----- serial comms ---------------------------------------------
+serial_init:
+            ret
 
-rst20:       
-            reti
+            ;; read byte from serial port to register a
+            ;; if byte is not available Z flag is set
+serial_read_a:
+            ret
 
-rst28:       
-            reti
+            ;; write byte in reg. a to seriap port
+serial_write_a:
+            ret
 
-rst30:       
-            reti
+            ;; ----- debugger logic -------------------------------------------
+dbg_read_byte:
+            ret
 
-rst38:       
-            reti
+dbg_write_byte:
+            ret
 
-nmi:       
-            reti
-
-
-            ;; fill page in hl with value in de
-fill_page:  ld      a,#128              ; 128 x 2 bytes = 256 bytes
-fill_page_loop:
-            ;; copy 2 bytes from de to (hl)
-            ld      (hl),e
-            inc     hl
-            ld      (hl),d
-            inc     hl
-            dec     a
-            jr      nz,fill_page_loop
+dbg_read_regs:
             ret
