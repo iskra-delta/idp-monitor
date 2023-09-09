@@ -10,27 +10,27 @@ K := $(foreach exec,$(REQUIRED),\
 
 # Global settings: folders.
 ROOT = $(realpath .)
-BUILD_DIR			=	$(ROOT)/build
-BIN_DIR				=	$(ROOT)/bin
-SRC_DIR				=	$(ROOT)
+BUILD_DIR = $(ROOT)/build
+BIN_DIR = $(ROOT)/bin
+SRC_DIR = $(ROOT)
 
 # Tools.
-AS 					=	sdasz80
-AS_FLAGS			=	
+AS = sdasz80
+AS_FLAGS = 
 
 # Define configuration template and ouput file.
-CFG_TEMPLATE 		=	config_template.in
-CFG 				=	config.inc
+CFG_TEMPLATE = config_template.in
+CFG = config.inc
 
 # Passed into makefile, default is top of shared RAM on partner
 # minus 1 page for shared monitor stack
-MONITOR_ADDRESS		?=	0xef00
-MONITOR_STACK		?=	0xff00
-MONITOR_SIZE		?=	0x1000
+MONITOR_ADDRESS ?= 0xef00
+MONITOR_STACK ?= 0xff00
+MONITOR_SIZE ?= 0x1000
 
 # Assembler files.
-SRC_FILES			=	$(wildcard $(SRC_DIR)/*.s)
-OUT_FILES			=	$(patsubst $(SRC_DIR)/%.s,$(BUILD_DIR)/%.rel,$(SRC_FILES))
+SRC_FILES = $(wildcard $(SRC_DIR)/*.s)
+OUT_FILES = $(patsubst $(SRC_DIR)/%.s,$(BUILD_DIR)/%.rel,$(SRC_FILES))
 
 .PHONY:	all clean
 all: create_dirs $(CFG) $(OUT_FILES)
