@@ -1,0 +1,11 @@
+        ;; config_template.in
+        ;; 
+        ;; template for creating config.s for the
+        ;; monitor program. this file is used to glue
+        ;; together various parts of the monitor software
+        ;;
+        ;; 2023-09-09   tstih
+
+        ;; monitor size and address
+        .equ    MONITOR_SIZE, CFG_MONITOR_SIZE
+        .equ    MONITOR_START, 0xffff-MONITOR_SIZE

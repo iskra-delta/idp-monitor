@@ -8,21 +8,20 @@
             ;; 2023-09-09   tstih
             .module head
 
-            .include "config.inc"
+            .include "../config.inc"
 
             .area   _HEADER (ABS)
             .org    0x0000
             di                              ; disable interrupts (just in case)
-            ld      sp,#MONITOR_STACK       ; initialize stack.
             
             ;; now copy the monitor to destination
             ld      hl,#monitor           
-            ld      de,#MONITOR_ADDRESS
+            ld      de,#MONITOR_START
             ld      bc,#MONITOR_SIZE        
             ldir                        
             
             ;; and jump to it
-            jp      MONITOR_ADDRESS
+            jp      MONITOR_START
             ;; start of monitor code.
             ;; the monitor is compiled separately to the target
             ;; address and glued to the end of this file by the 
