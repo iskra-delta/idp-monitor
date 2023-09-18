@@ -16,22 +16,27 @@
             .module monitor
 
             .area   _CODE
-page0:      ;; page 0 table only has two entries
+page0_tbl:  ;; page 0 table only has two entries
             ;; RST 0x00 is debugger start
             ;; RST 0x08 is debugger breakpoint
             jp      rst0
             jp      rst8
+
 init_page0:
-            ld      hl,#page0           ; from "our" page 0
+            ;; init page 0
+            ld      hl,#page0_tbl       ; from "our" page 0
             ld      de,#0x0             ; RST 0 vector
             ld      bc,#3               ; jp opcode + address
             ldir
             ld      de,#0x8             ; and rst 8
             ld      bc,#3               
-            ret
+            ldir                        ; rst 8 handler to page 0
+            ;; jump to monitor
+            rst     0x00                ; jump to monitor
+
 
             ;; monitor code assumes that interrupts are disabled!
-rst0:       
+rst0:       ld      hl,#stack           ; reset stack
             ;; switch ROM off
             out     (0x80),a
             ;; init page 0 of bank 0
@@ -41,8 +46,6 @@ rst0:
             ;; init page 0 of bank 1
             call    init_page0
             ;; and pass control to the debugger 
-            jp  rst8
-
 rst8:       ;; the debugger (breakpoint!)
             reti
 
