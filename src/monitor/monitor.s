@@ -31,12 +31,11 @@ init_page0:
             ld      de,#0x8             ; and rst 8
             ld      bc,#3               
             ldir                        ; rst 8 handler to page 0
-            ;; jump to monitor
-            rst     0x00                ; jump to monitor
+            ret
 
 
             ;; monitor code assumes that interrupts are disabled!
-rst0:       ld      hl,#stack           ; reset stack
+rst0:       ld      sp,#stack           ; reset stack
             ;; switch ROM off
             out     (0x80),a
             ;; init page 0 of bank 0
