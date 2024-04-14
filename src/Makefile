@@ -24,12 +24,5 @@ $(SUBDIRS):
 	
 glue:
 	@cat $(BIN_FILES) > $(BIN_DIR)/$(TARGET)
-	truncate --size=16k $(BIN_DIR)/$(TARGET) 
-	fuse	--rom-48 $(BIN_DIR)/$(TARGET) \
-			--machine 48 \
-			--graphics-filter 2x \
-			--no-sound \
-			--writable-roms \
-			--debugger-command "t 0x0000"
 
 clean:

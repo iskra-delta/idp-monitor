@@ -15,6 +15,9 @@
             ;; 2023-09-09   tstih
             .module monitor
 
+            .globl  sio_init
+            .globl  sio_write_a
+
             .area   _CODE
 page0_tbl:  ;; page 0 table only has two entries
             ;; RST 0x00 is debugger start
@@ -46,7 +49,18 @@ rst0:       ld      sp,#stack           ; reset stack
             call    init_page0
             ;; and pass control to the debugger 
 rst8:       ;; the debugger (breakpoint!)
+            call    sio_init
+            ld      hl,#hello
+hello_loop$:
+            ld      a,(hl)
+            or      a
+            jr      z,hello_end$
+            call    sio_write_a
+            inc     hl
+            jr      hello_loop$
+hello_end$:
             reti
+hello:      .asciz  "Hello World!"
 
             ;; help linker find _DATA segment
             .area   _DATA
